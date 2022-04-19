@@ -1,5 +1,6 @@
 import * as THREE from 'three'
-// import {OrbitControls} from 'THR'
+import {OrbitControls} from 'three/examples/jsm/controls/OrbitControls.js'
+import {GLTFLoader} from 'three/examples/jsm/loaders/GLTFLoader.js'
 
 
 //1: scene 
@@ -8,15 +9,26 @@ const scene = new THREE.Scene()
 
 // const loadingScreen = new THREE.ShaderMaterial();
 //2: object | geometry + materials
-const geometry = new THREE.BoxGeometry(1,1,1)
-const material = new THREE.MeshBasicMaterial({ color: 0xff0000})
-const mesh = new THREE.Mesh(geometry, material)
-mesh.rotation.x = 1
-mesh.rotation.z = 1
-// mesh.rotation.y = 0.5 * Math.PI;
-mesh.position.y = 0.25
+const gltfLoader = new GLTFLoader()
+gltfLoader.load(
+    '/crane/scene.gltf',
+    (gltf) => 
+    {
+        gltf.scene.scale.set(0.005, 0.005, 0.005)
+        gltf.scene.rotation.set(0,Math.PI * 0.9,0)
+        scene.add(gltf.scene)
+    }
+)
 
-scene.add(mesh)
+
+const material = new THREE.MeshBasicMaterial({color:0x555555})
+const floor = new THREE.Mesh(
+    new THREE.PlaneGeometry(50,50), 
+    material
+)
+floor.rotation.x = - Math.PI * 0.5
+floor.position.y = - 3
+scene.add(floor)
 
 
 
@@ -27,19 +39,27 @@ const sizes = {
 
 //3: camera
 const camera = new THREE.PerspectiveCamera(75, sizes.width / sizes.height, 0.1, 1000)
-// camera.position.x = 2
-// camera.position.y = 2 
-camera.position.z = 2
+camera.position.z = 5
+camera.position.y = 2
+camera.position.x = -0.5
+camera.rotation.x = 4
 scene.add(camera)
 
+const controls = new OrbitControls(camera, canvas)
+controls.enableDamping = true
 
 //4: render
 const renderer = new THREE.WebGLRenderer({
-    canvas: canvas
+    canvas: canvas,
+    alpha:true
 })
 
+renderer.setClearAlpha(0)
 renderer.setSize(sizes.width, sizes.height)
 const renderScene = () => {
+
+
+    controls.update()
     renderer.render(scene,camera)
     window.requestAnimationFrame(renderScene)
 }
