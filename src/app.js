@@ -1,11 +1,15 @@
 import * as THREE from 'three'
 import {OrbitControls} from 'three/examples/jsm/controls/OrbitControls.js'
 import {GLTFLoader} from 'three/examples/jsm/loaders/GLTFLoader.js'
+import * as dat from 'lil-gui'
 
+// gui tester + resize refreshing
 
 //1: scene 
 const canvas = document.querySelector('canvas#webgl')
 const scene = new THREE.Scene()
+
+const gui = new dat.GUI()
 
 // const loadingScreen = new THREE.ShaderMaterial();
 //2: object | geometry + materials
@@ -15,7 +19,11 @@ gltfLoader.load(
     (gltf) => 
     {
         gltf.scene.scale.set(0.005, 0.005, 0.005)
-        gltf.scene.rotation.set(0,Math.PI * 0.9,0)
+        gltf.scene.position.set(0.5, 0, 0.5)
+        gltf.scene.rotation.set(0,Math.PI * 0.75,0)
+        gui.add(gltf.scene.position, 'x')
+        gui.add(gltf.scene.position, 'y')
+        gui.add(gltf.scene.position, 'z')
         scene.add(gltf.scene)
     }
 )
@@ -30,12 +38,25 @@ floor.rotation.x = - Math.PI * 0.5
 floor.position.y = - 3
 scene.add(floor)
 
-
-
 const sizes = {
     width: window.innerWidth,
     height: window.innerHeight
 }
+
+window.addEventListener('resize', () => {
+    sizes.width = window.innerWidth
+    sizes.height = window.innerHeight
+
+    camera.aspect = sizes.width / sizes.height
+    camera.updateProjectionMatrix()
+
+    renderer.setSize(sizes.width, sizes.height)
+    renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2))
+})
+
+const ambientLight = new THREE.AmbientLight(0xffffff, 0.5)
+scene.add(ambientLight)
+
 
 //3: camera
 const camera = new THREE.PerspectiveCamera(75, sizes.width / sizes.height, 0.1, 1000)
@@ -54,9 +75,11 @@ const renderer = new THREE.WebGLRenderer({
     alpha:true
 })
 
+
 renderer.setClearAlpha(0)
 renderer.setSize(sizes.width, sizes.height)
 const renderScene = () => {
+
 
 
     controls.update()
